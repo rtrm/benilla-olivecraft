@@ -81,11 +81,9 @@ pub(super) fn render_view(
         let mut model = lua.app_data_mut::<Model>().expect("model app_data");
         let knows = |id: u32| model.spellbook.slots.iter().any(|s| s.spell_id == id);
         let known = v.required_spell != 0 && knows(v.required_spell);
-        // A taught spell (trigger 6, learn) the player knows: the always-red ITEM_SPELL_KNOWN.
-        let taught = v
-            .spell_triggers
-            .iter()
-            .any(|&(t, id, _)| t == 6 && id != 0 && knows(id));
+        // A recipe-pattern item whose taught spell the player already knows: the always-red
+        // ITEM_SPELL_KNOWN. `taught_spell` already followed the on-use wrapper to the real ability.
+        let taught = v.taught_spell.is_some_and(|id| knows(id));
         // The set view (a miss records the ask) and the equipped ids the set block counts.
         let set_view = (v.item_set != 0)
             .then(|| {

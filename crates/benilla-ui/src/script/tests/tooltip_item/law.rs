@@ -129,7 +129,7 @@ fn verified_families_signable_locked_resists_known() {
             start_quest: 42,
             lock_id: 7,
             resistances: [5, 5, 5, 5, 5, 5],
-            spell_triggers: vec![(6, 2020, "Recipe: Stew".into())],
+            taught_spell: Some(2020),
             description: "Sign here.".into(),
             ..Default::default()
         },

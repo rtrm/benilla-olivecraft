@@ -73,9 +73,14 @@ pub struct ItemTemplateView {
     pub required_rep_line: Option<String>,
     pub required_rep_faction: u32,
     pub required_rep_rank: u32,
-    /// Green trigger-spell lines `(trigger, spell id, text)` in wire order: 0 and 5 "Use:",
-    /// 1 "Equip:", 2 "Chance on hit:", 6 a taught spell (no line, only the "Already known" red).
+    /// Green trigger-spell lines `(trigger, spell id, text)` in wire order (`ItemSpelltriggerType`:
+    /// 0 "Use:", 1 "Equip:", 2 "Chance on hit:").
     pub spell_triggers: Vec<(u32, u32, String)>,
+    /// The ability a trigger-0 (on-use) `SPELL_EFFECT_LEARN_SPELL` wrapper teaches, resolved
+    /// through [`benilla_formats::SpellCatalog::learned_spell`]: a recipe-pattern item's real
+    /// taught spell, not the wrapper's own id. The always-red "Already known" line (`ITEM_SPELL_KNOWN`)
+    /// prints when the player already knows this.
+    pub taught_spell: Option<u32>,
     pub lock_id: u32,
     /// "N Charge(s)" for the first spell slot past the builder's gate (`0x52db51`: 0 and -1
     /// print nothing, else the absolute value); 0 prints no line.

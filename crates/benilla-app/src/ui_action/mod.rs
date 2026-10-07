@@ -28,6 +28,8 @@ mod feed_tests;
 mod net;
 mod ranks;
 mod state;
+pub(crate) mod synthetic_mounts;
+pub(crate) mod synthetic_spells;
 pub(crate) mod toggle;
 mod weapon_icon;
 
@@ -142,6 +144,21 @@ impl Spells {
             radii: Default::default(),
         }
     }
+}
+
+/// The 5875 spell data; `None` skips where the install is absent.
+#[cfg(test)]
+pub(crate) fn real_spells() -> Option<Spells> {
+    let data = benilla_formats::wow_data_or_skip!(None);
+    let mut chain = benilla_formats::open_chain(&data).expect("open chain");
+    Some(Spells {
+        catalog: benilla_formats::load_spell_catalog(&mut chain).expect("Spell.dbc"),
+        forms: benilla_formats::load_shapeshift_forms(&mut chain).expect("forms"),
+        ranges: benilla_formats::load_spell_ranges(&mut chain).expect("ranges"),
+        cast_times: benilla_formats::load_spell_cast_times(&mut chain).expect("cast times"),
+        durations: benilla_formats::load_spell_durations(&mut chain).expect("durations"),
+        radii: benilla_formats::load_spell_radii(&mut chain).expect("radii"),
+    })
 }
 
 /// The reference's learned-ability latches: at learn time `0x4b25e0` stores a spell's id by its
@@ -277,7 +294,9 @@ fn load_spells(mut commands: Commands, assets: Option<Res<WorldAssets>>) {
         benilla_formats::load_spell_catalog(&mut chain)
     };
     match loaded {
-        Ok(catalog) => {
+        Ok(mut catalog) => {
+            synthetic_spells::install(&mut catalog);
+            synthetic_mounts::install(&mut catalog);
             let forms = {
                 let mut chain = assets.chain.lock_recover();
                 benilla_formats::load_shapeshift_forms(&mut chain).unwrap_or_else(|e| {
